@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Preview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="background:#181f2a; color:#eaeaea; font-family:Vazirmatn,sans-serif;">
+    <div style="padding:24px; max-width:900px; margin:auto;">
+        <a href="/" style="color:#66c0f4; text-decoration:none; font-weight:bold;">← Back</a>
+        <h2 style="margin-top:18px; color:#66c0f4;">File Preview: <span style="font-size:1rem; color:#bdbdbd">{{ filename }}</span></h2>
+        <div style="margin-top:24px;">
+            {% if filetype == 'image' %}
+                <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="image" style="max-width:100%; border-radius:10px; box-shadow:0 2px 12px #000a;">
+            {% elif filetype == 'text' %}
+                <pre style="background:#232b36; color:#eaeaea; padding:18px; border-radius:10px; font-size:1.05rem; overflow-x:auto; box-shadow:0 2px 12px #000a; direction:ltr; text-align:left;">{{ content|e }}</pre>
+            {% else %}
+                <div style="background:#232b36; color:#eaeaea; padding:18px; border-radius:10px; font-size:1.1rem; box-shadow:0 2px 12px #000a;">
+                    <p>Preview for this file type is not supported.</p>
+                    <a href="{{ url_for('uploaded_file', filename=filename) }}" style="color:#66c0f4; font-weight:bold;">Download file</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
