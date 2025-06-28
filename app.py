@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect, render_template, send_from_directory, session, flash, url_for
 import os
-# import secrets
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 
@@ -12,7 +12,24 @@ app.secret_key = '2fbb9a8d5f4c48760d97f4531cd5bdf4'
 
 
 UPLOAD_FOLDER = 'uploads'
-PASSWORD = 'prsn'
+
+
+PASSWORD_FILE = 'password.txt'
+
+
+if not os.path.exists(PASSWORD_FILE):
+    with open(PASSWORD_FILE, 'w') as f:
+        f.write(generate_password_hash('nati'))
+
+
+def get_password_hash():
+    with open(PASSWORD_FILE, 'r') as f:
+        return f.read().strip()
+
+
+def set_password_hash(new_hash):
+    with open(PASSWORD_FILE, 'w') as f:
+        f.write(new_hash)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -20,7 +37,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form['password'] == PASSWORD:
+        password_hash = get_password_hash()
+        if check_password_hash(password_hash, request.form['password']):
             session['logged_in'] = True
             return redirect(url_for('index'))
         else:
@@ -54,8 +72,8 @@ def index():
             )
             flash('file renamed successfully')
         elif 'change_password' in request.form and 'new_password' in request.form:
-            global PASSWORD
-            PASSWORD = request.form['new_password']
+            new_hash = generate_password_hash(request.form['new_password'])
+            set_password_hash(new_hash)
             flash('Password changed successfully!')
         return redirect(url_for('index'))
 
