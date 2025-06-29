@@ -110,11 +110,15 @@ def index():
                 os.remove(target)
                 flash('File deleted successfully')
         elif 'rename_old' in request.form and 'rename_new' in request.form:
-            os.rename(
-                os.path.join(UPLOAD_FOLDER, request.form['rename_old']),
-                os.path.join(UPLOAD_FOLDER, request.form['rename_new'])
-            )
-            flash('file renamed successfully')
+            old_path = os.path.join(UPLOAD_FOLDER, request.form['rename_old'])
+            new_path = os.path.join(UPLOAD_FOLDER, request.form['rename_new'])
+            # اگر پوشه بود، باید مطمئن شویم مسیر جدید وجود ندارد و والدش وجود دارد
+            if os.path.isdir(old_path):
+                new_dir_parent = os.path.dirname(new_path)
+                if not os.path.exists(new_dir_parent):
+                    os.makedirs(new_dir_parent, exist_ok=True)
+            os.rename(old_path, new_path)
+            flash('file/folder renamed successfully')
         elif 'change_password' in request.form and 'new_password' in request.form:
             new_hash = generate_password_hash(request.form['new_password'])
             set_password_hash(new_hash)

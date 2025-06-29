@@ -110,25 +110,19 @@
                             {% endif %}
                         </div>
                         <div class="file-actions">
-                            {% if node is mapping %}
-                                <form method="POST" style="display:inline;" class="delete-form">
-                                    <input type="hidden" name="delete" value="{{ full_path }}">
-                                    <button type="submit" title="delete folder" class="icon-btn delete-btn">🗑️</button>
-                                </form>
-                            {% else %}
-                                <form method="POST" style="display:inline;" class="delete-form">
-                                    <input type="hidden" name="delete" value="{{ full_path }}">
-                                    <button type="submit" title="delete" class="icon-btn delete-btn">🗑️</button>
-                                </form>
-                                <button type="button" class="icon-btn rename-btn" title="Rename" onclick="showRenameInput(this, '{{ full_path }}')">✏️</button>
-                                <form method="POST" style="display:none;" class="rename-form-inline" onsubmit="return handleRenameSubmit(this, event)">
-                                    <input type="hidden" name="rename_old" value="{{ full_path }}">
-                                    <input type="text" name="rename_new_base" placeholder="new name" required class="rename-input-inline">
-                                    <span class="rename-ext" style="color:#bdbdbd; font-size:0.98em; margin-right:2px;"></span>
-                                    <button type="submit" class="icon-btn ok-btn" title="ok">✔️</button>
-                                    <button type="button" class="icon-btn cancel-btn" title="cancel" onclick="hideRenameInput(this)">✖️</button>
-                                </form>
-                            {% endif %}
+                            <form method="POST" style="display:inline;" class="delete-form">
+                                <input type="hidden" name="delete" value="{{ full_path }}">
+                                <button type="submit" title="delete{% if node is mapping %} folder{% endif %}" class="icon-btn delete-btn">🗑️</button>
+                            </form>
+                            <button type="button" class="icon-btn rename-btn" title="Rename" onclick="showRenameInput(this, '{{ full_path }}', '{% if node is mapping %}1{% else %}0{% endif %}')">✏️</button>
+                            <form method="POST" style="display:none;" class="rename-form-inline" onsubmit="return handleRenameSubmit(this, event)">
+                                <input type="hidden" name="rename_old" value="{{ full_path }}">
+                                <input type="text" name="rename_new_base" placeholder="new name" required class="rename-input-inline">
+                                <span class="rename-ext" style="color:#bdbdbd; font-size:0.98em; margin-right:2px;"></span>
+                                <input type="hidden" name="is_folder" value="{{ '1' if node is mapping else '' }}">
+                                <button type="submit" class="icon-btn ok-btn" title="ok">✔️</button>
+                                <button type="button" class="icon-btn cancel-btn" title="cancel" onclick="hideRenameInput(this)">✖️</button>
+                            </form>
                         </div>
                         {% if node is mapping and node %}
                             <ul style="margin-right:24px; display:none;">
@@ -171,21 +165,26 @@
   }
 
   // Rename inline logic
-  function showRenameInput(btn, filename) {
+  function showRenameInput(btn, filename, isFolder) {
     const actions = btn.parentElement;
     const form = actions.querySelector('.rename-form-inline');
     btn.style.display = 'none';
     form.style.display = 'inline-flex';
-    // Split filename to base and ext
-    let dotIdx = filename.lastIndexOf('.')
-    let base = filename, ext = '';
-    if(dotIdx > 0) {
-      base = filename.substring(0, dotIdx);
-      ext = filename.substring(dotIdx);
-    }
     const input = form.querySelector('input[name=rename_new_base]');
-    input.value = base;
-    form.querySelector('.rename-ext').textContent = ext;
+    if(isFolder) {
+      input.value = filename;
+      form.querySelector('.rename-ext').textContent = '';
+    } else {
+      // Split filename to base and ext
+      let dotIdx = filename.lastIndexOf('.')
+      let base = filename, ext = '';
+      if(dotIdx > 0) {
+        base = filename.substring(0, dotIdx);
+        ext = filename.substring(dotIdx);
+      }
+      input.value = base;
+      form.querySelector('.rename-ext').textContent = ext;
+    }
     input.focus();
   }
   function hideRenameInput(btn) {
@@ -195,9 +194,15 @@
   }
   function handleRenameSubmit(form, event) {
     event.preventDefault();
-    const base = form.querySelector('input[name=rename_new_base]').value;
-    const ext = form.querySelector('.rename-ext').textContent;
-    const full = base + ext;
+    const isFolder = form.querySelector('input[name=is_folder]').value === '1';
+    let full;
+    if(isFolder) {
+      full = form.querySelector('input[name=rename_new_base]').value;
+    } else {
+      const base = form.querySelector('input[name=rename_new_base]').value;
+      const ext = form.querySelector('.rename-ext').textContent;
+      full = base + ext;
+    }
     // Create a hidden input for the full name
     let hidden = form.querySelector('input[name=rename_new]');
     if(!hidden) {
