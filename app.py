@@ -16,10 +16,10 @@ def preview_file(filename):
         return abort(404)
     mime, _ = mimetypes.guess_type(file_path)
     if mime and mime.startswith('image/'):
-        # نمایش عکس
+
         return render_template('preview.html', filename=filename, filetype='image')
     elif mime and (mime.startswith('text/') or filename.lower().endswith(('.py','.txt','.md','.html','.css','.js','.json','.csv'))):
-        # نمایش متن یا کد
+
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -28,7 +28,7 @@ def preview_file(filename):
                 content = f.read()
         return render_template('preview.html', filename=filename, filetype='text', content=content)
     else:
-        # سایر فایل‌ها: لینک دانلود
+
         return render_template('preview.html', filename=filename, filetype='other')
 
 # app.secret_key = secrets.token_hex(32)
@@ -112,7 +112,7 @@ def index():
         elif 'rename_old' in request.form and 'rename_new' in request.form:
             old_path = os.path.join(UPLOAD_FOLDER, request.form['rename_old'])
             new_path = os.path.join(UPLOAD_FOLDER, request.form['rename_new'])
-            # اگر پوشه بود، باید مطمئن شویم مسیر جدید وجود ندارد و والدش وجود دارد
+
             if os.path.isdir(old_path):
                 new_dir_parent = os.path.dirname(new_path)
                 if not os.path.exists(new_dir_parent):

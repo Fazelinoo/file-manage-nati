@@ -144,7 +144,7 @@
         </div>
     </main>
 <script>
-  // Folder open/close logic
+
   function toggleFolder(el) {
     let li = el.closest('li');
     let sublist = li.querySelector('ul');
@@ -164,7 +164,7 @@
     if(event.target === modal) closeChangePassModal();
   }
 
-  // Rename inline logic
+
   function showRenameInput(btn, filename, isFolder) {
     const actions = btn.parentElement;
     const form = actions.querySelector('.rename-form-inline');
@@ -175,7 +175,7 @@
       input.value = filename;
       form.querySelector('.rename-ext').textContent = '';
     } else {
-      // Split filename to base and ext
+
       let dotIdx = filename.lastIndexOf('.')
       let base = filename, ext = '';
       if(dotIdx > 0) {
@@ -203,7 +203,7 @@
       const ext = form.querySelector('.rename-ext').textContent;
       full = base + ext;
     }
-    // Create a hidden input for the full name
+
     let hidden = form.querySelector('input[name=rename_new]');
     if(!hidden) {
       hidden = document.createElement('input');
