@@ -105,8 +105,10 @@
                             {% set full_path = parent_path + name %}
                             {% if node is mapping %}
                                 <span class="file-link folder-link" style="cursor:pointer;" onclick="toggleFolder(this)">{{ name }}/</span>
+                                <a href="/download/{{ full_path }}" class="icon-btn" title="دانلود فولدر" style="margin-right:6px;">⬇️</a>
                             {% else %}
                                 <a href="/preview/{{ full_path }}" class="file-link">{{ name }}</a>
+                                <a href="/download/{{ full_path }}" class="icon-btn" title="دانلود فایل" style="margin-right:6px;">⬇️</a>
                             {% endif %}
                         </div>
                         <div class="file-actions">

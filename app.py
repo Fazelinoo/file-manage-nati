@@ -1,10 +1,37 @@
+
 from flask import abort
 import mimetypes
-from flask import Flask, request, redirect, render_template, send_from_directory, session, flash, url_for
+from flask import Flask, request, redirect, render_template, send_from_directory, session, flash, url_for, send_file
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
+import zipfile
+import io
 
 app = Flask(__name__)
+@app.route('/download/<path:filename>')
+def download_file(filename):
+    if not session.get('logged_in'):
+        flash("you dont have access")
+        return redirect(url_for('login'))
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    if not os.path.exists(file_path):
+        return abort(404)
+    if os.path.isfile(file_path):
+        return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+    elif os.path.isdir(file_path):
+        # Zip the folder in memory
+        memory_file = io.BytesIO()
+        with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for root, dirs, files in os.walk(file_path):
+                for file in files:
+                    abs_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(abs_path, UPLOAD_FOLDER)
+                    zf.write(abs_path, rel_path)
+        memory_file.seek(0)
+        zip_filename = os.path.basename(file_path.rstrip('/')) + '.zip'
+        return send_file(memory_file, download_name=zip_filename, as_attachment=True)
+    else:
+        return abort(404)
 
 @app.route('/preview/<path:filename>')
 def preview_file(filename):
@@ -150,4 +177,4 @@ def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port='8000')
